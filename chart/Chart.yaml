@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tls-certificate-inspector
+description: Browser-based TLS certificate and chain inspector
+type: application
+version: 0.2.0
+appVersion: "0.2.0"

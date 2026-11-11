@@ -1,0 +1,16 @@
+.git
+.gitignore
+.dockerignore
+.kiro
+.vscode
+.idea
+**/__pycache__
+**/*.pyc
+.venv
+venv
+chart
+README.md
+*.key
+*.p12
+*.jks
+.env*

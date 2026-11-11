@@ -1,0 +1,1055 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>TLS Certificate Toolkit</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --bg2: #0a0a0a;
+            --panel: #0d0d0d;
+            --panel2: #161616;
+            --border: #2b2b2b;
+            --text: #ededed;
+            --muted: #9a9a9a;
+            --primary: #3b82f6;
+            --primary2: #3b82f6;
+            --good: #2ecc8f;
+            --good-bg: rgba(46, 204, 143, .12);
+            --warn: #f5b942;
+            --warn-bg: rgba(245, 185, 66, .12);
+            --bad: #ff6b7a;
+            --bad-bg: rgba(255, 107, 122, .12);
+            --input: #050505;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .6);
+            --radius: 14px;
+        }
+
+        [data-theme=light] {
+            --bg: #f4f4f5;
+            --bg2: #ececee;
+            --panel: #ffffff;
+            --panel2: #f4f4f5;
+            --border: #dcdce0;
+            --text: #18181b;
+            --muted: #63636b;
+            --good-bg: rgba(20, 160, 110, .1);
+            --warn-bg: rgba(220, 150, 20, .12);
+            --bad-bg: rgba(220, 60, 80, .1);
+            --input: #fafafa;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .1);
+            --good: #0f9f6e;
+            --warn: #b97800;
+            --bad: #d63a4d;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            min-height: 100vh
+        }
+
+        .wrap {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 28px 20px 60px
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 22px
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px
+        }
+
+        .logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            box-shadow: var(--shadow)
+        }
+
+        h1 {
+            font-size: 24px;
+            margin: 0;
+            letter-spacing: -.2px
+        }
+
+        .sub {
+            color: var(--muted);
+            margin: 2px 0 0;
+            font-size: 14px
+        }
+
+        .icon-btn {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px
+        }
+
+        .icon-btn:hover {
+            border-color: var(--primary)
+        }
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+            padding: 6px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            margin-bottom: 20px;
+            overflow-x: auto
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: transparent;
+            border: 0;
+            color: var(--muted);
+            padding: 11px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 600;
+            white-space: nowrap
+        }
+
+        .tab:hover {
+            color: var(--text);
+            background: var(--panel2)
+        }
+
+        .tab.active {
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            box-shadow: 0 4px 14px rgba(59, 130, 246, .35)
+        }
+
+        :focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 26px;
+            box-shadow: var(--shadow)
+        }
+
+        .card h2 {
+            margin: 0 0 4px;
+            font-size: 20px
+        }
+
+        .lead {
+            color: var(--muted);
+            margin: 0 0 20px
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px
+        }
+
+        @media(max-width:800px) {
+            .grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .field {
+            margin-bottom: 16px
+        }
+
+        label,
+        .lbl {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px
+        }
+
+        .hint {
+            color: var(--muted);
+            font-weight: 400
+        }
+
+        textarea,
+        input[type=text],
+        input[type=password],
+        input:not([type]) {
+            width: 100%;
+            background: var(--input);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 11px 12px;
+            font: inherit
+        }
+
+        textarea {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12.5px;
+            height: 130px;
+            resize: vertical
+        }
+
+        textarea:focus,
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, .2)
+        }
+
+        .drop {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            color: var(--muted);
+            transition: .15s;
+            background: var(--panel2)
+        }
+
+        .drop:hover,
+        .drop.over {
+            border-color: var(--primary);
+            color: var(--text);
+            background: rgba(59, 130, 246, .08)
+        }
+
+        .drop input {
+            display: none
+        }
+
+        .drop .name {
+            margin-left: auto;
+            font-size: 12px;
+            color: var(--good);
+            max-width: 50%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap
+        }
+
+        .pw {
+            position: relative;
+            max-width: 460px
+        }
+
+        .pw button {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: 0;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 6px;
+            font-size: 16px
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            color: #fff;
+            border: 0;
+            border-radius: 10px;
+            padding: 11px 20px;
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, .3);
+            transition: .15s
+        }
+
+        .btn:hover {
+            transform: translateY(-1px)
+        }
+
+        .btn:disabled {
+            opacity: .6;
+            cursor: wait;
+            transform: none
+        }
+
+        .btn.ghost {
+            background: var(--panel2);
+            color: var(--text);
+            box-shadow: none;
+            border: 1px solid var(--border)
+        }
+
+        .btn.sm {
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 8px
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 6px
+        }
+
+        .spin {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, .4);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: s .7s linear infinite
+        }
+
+        @keyframes s {
+            to {
+                transform: rotate(360deg)
+            }
+        }
+
+        .hidden {
+            display: none !important
+        }
+
+        .status {
+            margin-top: 14px;
+            font-size: 14px
+        }
+
+        .status.ok {
+            color: var(--good)
+        }
+
+        .status.err {
+            color: var(--bad)
+        }
+
+        /* results */
+        .banner {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 16px 18px;
+            border-radius: 12px;
+            border: 1px solid;
+            margin: 22px 0 14px
+        }
+
+        .banner .ic {
+            font-size: 26px;
+            line-height: 1
+        }
+
+        .banner h3 {
+            margin: 0 0 2px;
+            font-size: 17px
+        }
+
+        .banner.good {
+            background: var(--good-bg);
+            border-color: var(--good)
+        }
+
+        .banner.good h3 {
+            color: var(--good)
+        }
+
+        .banner.warn {
+            background: var(--warn-bg);
+            border-color: var(--warn)
+        }
+
+        .banner.warn h3 {
+            color: var(--warn)
+        }
+
+        .banner.bad {
+            background: var(--bad-bg);
+            border-color: var(--bad)
+        }
+
+        .banner.bad h3 {
+            color: var(--bad)
+        }
+
+        .chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 10px 0
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: var(--panel2);
+            color: var(--muted)
+        }
+
+        .chip.good {
+            color: var(--good);
+            background: var(--good-bg);
+            border-color: transparent
+        }
+
+        .chip.warn {
+            color: var(--warn);
+            background: var(--warn-bg);
+            border-color: transparent
+        }
+
+        .chip.bad {
+            color: var(--bad);
+            background: var(--bad-bg);
+            border-color: transparent
+        }
+
+        .msgs {
+            margin: 8px 0 0;
+            padding: 0;
+            list-style: none
+        }
+
+        .msgs li {
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            font-size: 14px
+        }
+
+        .msgs li.e {
+            background: var(--bad-bg);
+            color: var(--bad)
+        }
+
+        .msgs li.w {
+            background: var(--warn-bg);
+            color: var(--warn)
+        }
+
+        .note {
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .chain {
+            position: relative;
+            margin-top: 16px
+        }
+
+        .cert {
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            overflow: hidden
+        }
+
+        .cert>summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px
+        }
+
+        .cert>summary::-webkit-details-marker {
+            display: none
+        }
+
+        .cert>summary::after {
+            content: "▸";
+            margin-left: auto;
+            color: var(--muted);
+            transition: .15s
+        }
+
+        .cert[open]>summary::after {
+            transform: rotate(90deg)
+        }
+
+        .num {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: 13px;
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            color: #fff;
+            flex: none
+        }
+
+        .ttl {
+            min-width: 0
+        }
+
+        .ttl b {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap
+        }
+
+        .ttl span {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        .body {
+            padding: 4px 16px 16px;
+            border-top: 1px solid var(--border)
+        }
+
+        .kv {
+            display: grid;
+            grid-template-columns: 170px 1fr;
+            gap: 8px 16px;
+            margin: 12px 0
+        }
+
+        @media(max-width:640px) {
+            .kv {
+                grid-template-columns: 1fr
+            }
+
+            .kv dt {
+                margin-top: 6px
+            }
+        }
+
+        .kv dt {
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        .kv dd {
+            margin: 0;
+            word-break: break-word;
+            font-size: 14px
+        }
+
+        .mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            font-size: 12.5px
+        }
+
+        .sec {
+            margin-top: 14px
+        }
+
+        .sec h4 {
+            margin: 0 0 6px;
+            font-size: 13px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .6px
+        }
+
+        pre {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            background: var(--input);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 6px 0;
+            max-height: 260px;
+            overflow: auto;
+            font-size: 12px
+        }
+
+        .sub-details {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-top: 8px;
+            background: var(--input)
+        }
+
+        .sub-details summary {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px
+        }
+
+        .expiry {
+            height: 6px;
+            border-radius: 99px;
+            background: var(--border);
+            overflow: hidden;
+            margin-top: 6px;
+            max-width: 260px
+        }
+
+        .expiry i {
+            display: block;
+            height: 100%
+        }
+
+        .sec-note {
+            margin-top: 22px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            color: var(--muted);
+            font-size: 13px
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 10px 18px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            pointer-events: none;
+            transition: .25s
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateX(-50%)
+        }
+
+        .searchrow {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap
+        }
+
+        .searchrow input {
+            flex: 1;
+            min-width: 220px
+        }
+
+        .skeleton {
+            height: 90px;
+            border-radius: 12px;
+            margin-top: 18px;
+            background: linear-gradient(90deg, var(--panel2), var(--border), var(--panel2));
+            background-size: 200% 100%;
+            animation: sk 1.2s infinite
+        }
+
+        @keyframes sk {
+            to {
+                background-position: -200% 0
+            }
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            * {
+                animation: none !important;
+                transition: none !important
+            }
+        }
+
+        .theme-switch {
+            display: inline-flex;
+            padding: 4px;
+            gap: 2px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            flex: none;
+        }
+
+        .theme-switch button {
+            background: transparent;
+            border: 0;
+            color: var(--muted);
+            font: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .theme-switch button:hover {
+            color: var(--text);
+        }
+
+        .theme-switch button[aria-checked=true] {
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            box-shadow: 0 2px 8px rgba(59, 130, 246, .35);
+        }
+
+        :root {
+            color-scheme: dark;
+        }
+
+        [data-theme=light] {
+            color-scheme: light;
+        }
+
+        body,
+        .card,
+        .tabs,
+        .cert,
+        .theme-switch {
+            transition: background-color .2s, color .2s, border-color .2s;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header>
+            <div class="brand">
+                <div class="logo" aria-hidden="true">🔐</div>
+                <div>
+                    <h1>TLS Certificate Toolkit</h1>
+                    <p class="sub">Inspect certificates, validate chains, and create Java JKS stores</p>
+                </div>
+            </div>
+            <div class="theme-switch" id="theme" role="radiogroup" aria-label="Color theme">
+                <button type="button" role="radio" data-mode="light" aria-checked="false" title="Light theme">☀️
+                    Light</button>
+                <button type="button" role="radio" data-mode="dark" aria-checked="true" title="Dark theme">🌙
+                    Dark</button>
+            </div>
+        </header>
+
+        <div class="tabs" role="tablist">
+            <button class="tab active" role="tab" data-tab="inspect">🔍 Inspect &amp; validate</button>
+            <button class="tab" role="tab" data-tab="remote">🌐 Inspect website</button>
+            <button class="tab" role="tab" data-tab="trust">🛡️ Truststore</button>
+            <button class="tab" role="tab" data-tab="key">🔑 Keystore</button>
+        </div>
+
+        <!-- Inspect -->
+        <section class="card" id="inspect">
+            <h2>Certificate chain inspector</h2>
+            <p class="lead">Paste or upload one or more PEM/DER certificates, in any order. The chain is ordered
+                automatically, and a self-signed root in the bundle is used as the trust anchor.</p>
+            <div class="field">
+                <span class="lbl">Certificate(s)</span>
+                <label class="drop"><span>📄 Drop or choose file(s)</span><span class="name"></span><input type="file"
+                        id="inspectfile" multiple accept=".pem,.crt,.cer,.der"></label>
+                <textarea id="inspectcert" placeholder="-----BEGIN CERTIFICATE-----"
+                    aria-label="Certificates"></textarea>
+                <div class="note" id="certcount" aria-live="polite"></div>
+            </div>
+            <div class="actions">
+                <button class="btn" id="inspectbtn" onclick="inspect()">Inspect &amp; validate</button>
+                <button class="btn ghost" onclick="clearInspect()">Clear</button>
+            </div>
+            <div id="inspection" aria-live="polite"></div>
+        </section>
+
+        <!-- Remote -->
+        <section class="card hidden" id="remote">
+            <h2>Inspect a remote HTTPS server</h2>
+            <p class="lead">Enter a public hostname (no URL or port). We connect on port 443 and show what the server
+                presents.</p>
+            <div class="searchrow">
+                <input id="host" placeholder="example.com" autocomplete="off" aria-label="Hostname">
+                <button class="btn" id="remotebtn" onclick="remoteInspect()">Inspect server</button>
+            </div>
+            <div id="remoteout" aria-live="polite"></div>
+        </section>
+
+        <!-- Truststore -->
+        <section class="card hidden" id="trust">
+            <h2>Generate truststore.jks</h2>
+            <p class="lead">Supply CA certificates only (intermediates and roots). Each certificate gets its own alias.
+            </p>
+            <div class="field">
+                <span class="lbl">CA certificates</span>
+                <label class="drop"><span>📄 Drop or choose file(s)</span><span class="name"></span><input type="file"
+                        id="trustfile" multiple></label>
+                <textarea id="trustcert" placeholder="Paste CA bundle PEM" aria-label="CA bundle"></textarea>
+            </div>
+            <div class="field">
+                <label for="trustpass">JKS password <span class="hint">(at least 6 characters)</span></label>
+                <div class="pw"><input type="password" id="trustpass" autocomplete="new-password"><button type="button"
+                        class="eye" aria-label="Show password">👁</button></div>
+            </div>
+            <div class="actions"><button class="btn" id="trustbtn" onclick="generate('truststore')">⬇ Download
+                    truststore.jks</button></div>
+            <p class="status" id="truststatus" aria-live="polite"></p>
+        </section>
+
+        <!-- Keystore -->
+        <section class="card hidden" id="key">
+            <h2>Generate keystore.jks</h2>
+            <p class="lead">Supply the leaf certificate first, followed by intermediates. Root CA is optional. The
+                private key must match the leaf.</p>
+            <div class="grid">
+                <div class="field">
+                    <span class="lbl">Certificate chain</span>
+                    <label class="drop"><span>📄 Drop or choose file(s)</span><span class="name"></span><input
+                            type="file" id="keyfile" multiple></label>
+                    <textarea id="keycert" placeholder="Leaf + intermediate PEM chain"
+                        aria-label="Certificate chain"></textarea>
+                </div>
+                <div class="field">
+                    <span class="lbl">Private key PEM <span class="hint">(RSA / EC / EdDSA)</span></span>
+                    <label class="drop"><span>🔑 Drop or choose key file</span><span class="name"></span><input
+                            type="file" id="privatefile"></label>
+                    <textarea id="privatekey" placeholder="-----BEGIN PRIVATE KEY-----" aria-label="Private key"
+                        autocomplete="off" spellcheck="false"></textarea>
+                </div>
+            </div>
+            <div class="grid">
+                <div>
+                    <div class="field"><label for="privatepass">Private key password <span class="hint">(only if
+                                encrypted)</span></label>
+                        <div class="pw"><input type="password" id="privatepass" autocomplete="off"><button type="button"
+                                class="eye" aria-label="Show password">👁</button></div>
+                    </div>
+                    <div class="field"><label for="alias">Keystore alias</label><input id="alias" value="server"
+                            style="max-width:460px"></div>
+                </div>
+                <div>
+                    <div class="field"><label for="keypass">JKS password <span class="hint">(at least 6
+                                characters)</span></label>
+                        <div class="pw"><input type="password" id="keypass" autocomplete="new-password"><button
+                                type="button" class="eye" aria-label="Show password">👁</button></div>
+                    </div>
+                </div>
+            </div>
+            <div class="actions"><button class="btn" id="keybtn" onclick="generate('keystore')">⬇ Download
+                    keystore.jks</button></div>
+            <p class="status" id="keystatus" aria-live="polite"></p>
+        </section>
+
+        <div class="sec-note">🔒 <b>Security:</b> private keys and passwords are sent to this server to build JKS files.
+            Use only over HTTPS on a trusted deployment. Nothing is intentionally persisted. Validation here does not
+            replace full RFC 5280 / hostname verification.</div>
+    </div>
+    <div id="toast" role="status"></div>
+
+    <script>
+        const $ = id => document.getElementById(id);
+        const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+        /* theme */
+        (function () {
+            const sw = $('theme'), root = document.documentElement;
+            let saved = null; try { saved = localStorage.getItem('theme') } catch (e) { }
+            const mq = matchMedia('(prefers-color-scheme: light)');
+            function apply(t) { root.dataset.theme = t; sw.querySelectorAll('button').forEach(b => b.setAttribute('aria-checked', b.dataset.mode === t)) }
+            apply(saved === 'light' || saved === 'dark' ? saved : (mq.matches ? 'light' : 'dark'));
+            sw.querySelectorAll('button').forEach(b => b.onclick = () => { apply(b.dataset.mode); try { localStorage.setItem('theme', b.dataset.mode) } catch (e) { } });
+            // follow OS changes until the user picks a theme explicitly
+            mq.addEventListener && mq.addEventListener('change', e => { let s2 = null; try { s2 = localStorage.getItem('theme') } catch (x) { } if (!s2) apply(e.matches ? 'light' : 'dark') });
+        })();
+
+        /* toast */
+        let tt; function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2200) }
+
+        /* tabs */
+        const TABS = ['inspect', 'remote', 'trust', 'key'];
+        function showTab(id) { document.querySelectorAll('.tab').forEach(x => { const on = x.dataset.tab === id; x.classList.toggle('active', on); x.setAttribute('aria-selected', on) }); TABS.forEach(t => $(t).classList.toggle('hidden', t !== id)) }
+        document.querySelectorAll('.tab').forEach(b => b.onclick = () => { showTab(b.dataset.tab); history.replaceState(null, '', '#' + b.dataset.tab) });
+        if (TABS.includes(location.hash.slice(1))) showTab(location.hash.slice(1));
+
+        /* password reveal */
+        document.querySelectorAll('.eye').forEach(b => b.onclick = () => { const i = b.parentElement.querySelector('input'); i.type = i.type === 'password' ? 'text' : 'password' });
+
+        /* file handling */
+        function toPem(bytes) {
+            if (new TextDecoder().decode(bytes.slice(0, 40)).includes('-----BEGIN')) return new TextDecoder().decode(bytes);
+            let b64 = ''; for (let i = 0; i < bytes.length; i += 8192)b64 += String.fromCharCode(...bytes.slice(i, i + 8192));
+            return '-----BEGIN CERTIFICATE-----\n' + btoa(b64).match(/.{1,64}/g).join('\n') + '\n-----END CERTIFICATE-----';
+        }
+        async function readFiles(files, target, input) {
+            const parts = []; for (const f of files) parts.push(toPem(new Uint8Array(await f.arrayBuffer())));
+            $(target).value = parts.join('\n');
+            const n = input.parentElement.querySelector('.name'); if (n) n.textContent = files.length > 1 ? files.length + ' files' : (files[0] ? files[0].name : '');
+        }
+        function bindFiles(file, target) {
+            const input = $(file), zone = input.parentElement;
+            input.addEventListener('change', e => readFiles(e.target.files, target, input));
+            ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('over') }));
+            ['dragleave', 'drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('over') }));
+            zone.addEventListener('drop', e => { if (e.dataTransfer.files.length) readFiles(e.dataTransfer.files, target, input) });
+        }
+        [['inspectfile', 'inspectcert'], ['trustfile', 'trustcert'], ['keyfile', 'keycert']].forEach(x => bindFiles(...x));
+        (function () {
+            const input = $('privatefile'), zone = input.parentElement;
+            const load = async f => { if (!f) return; $('privatekey').value = await f.text(); zone.querySelector('.name').textContent = f.name };
+            input.addEventListener('change', e => load(e.target.files[0]));
+            ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('over') }));
+            ['dragleave', 'drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('over') }));
+            zone.addEventListener('drop', e => load(e.dataTransfer.files[0]));
+        })();
+
+        /* network */
+        async function post(path, body) {
+            const r = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), cache: 'no-store' });
+            if (!r.ok) { const j = await r.json().catch(() => ({ detail: 'Request failed' })); throw Error(j.detail || 'Request failed') }
+            return r;
+        }
+        function busy(btn, on, label) { btn.disabled = on; if (on) { btn.dataset.l = btn.innerHTML; btn.innerHTML = '<span class="spin"></span> ' + label } else btn.innerHTML = btn.dataset.l || btn.innerHTML }
+
+        /* helpers */
+        const fmtDate = s => { const d = new Date(s); return isNaN(d) ? esc(s) : d.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) };
+        function expiryChip(days, valid) {
+            if (valid === false && days < 0) return '<span class="chip bad">Expired ' + Math.abs(days) + ' days ago</span>';
+            if (valid === false) return '<span class="chip bad">Not yet valid</span>';
+            if (days < 0) return '<span class="chip bad">Expired</span>';
+            if (days <= 30) return '<span class="chip warn">Expires in ' + days + ' days</span>';
+            return '<span class="chip good">' + days + ' days left</span>';
+        }
+        function expiryBar(c) {
+            const a = new Date(c.not_before).getTime(), b = new Date(c.not_after).getTime(), n = Date.now();
+            const p = Math.min(100, Math.max(0, (n - a) / (b - a) * 100));
+            const col = c.days_remaining < 0 ? 'var(--bad)' : c.days_remaining <= 30 ? 'var(--warn)' : 'var(--good)';
+            return '<div class="expiry" title="' + p.toFixed(0) + '% of lifetime elapsed"><i style="width:' + p + '%;background:' + col + '"></i></div>';
+        }
+        function cn(dn) { const m = /(?:^|,)CN=([^,]+)/.exec(dn || ''); return m ? m[1] : (dn || '(no subject)') }
+        function kv(rows) { return '<dl class="kv">' + rows.filter(r => r[1] !== null && r[1] !== undefined && r[1] !== '').map(r => '<dt>' + r[0] + '</dt><dd' + (r[2] ? ' class="mono"' : '') + '>' + (r[3] ? r[1] : esc(r[1])) + '</dd>').join('') + '</dl>' }
+        function copyBtn(text, label) { const id = 'c' + Math.random().toString(36).slice(2); copyBtn.m[id] = text; return '<button class="btn ghost sm" onclick="doCopy(\'' + id + '\')">📋 ' + label + '</button>' }
+        copyBtn.m = {};
+        function doCopy(id) { navigator.clipboard.writeText(copyBtn.m[id]).then(() => toast('Copied to clipboard'), () => toast('Copy failed')) }
+        function dlBtn(text, name) { const id = 'd' + Math.random().toString(36).slice(2); copyBtn.m[id] = text; return '<button class="btn ghost sm" onclick="downloadText(\'' + name + '\',copyBtn.m[\'' + id + '\'])">⬇ Download PEM</button>' }
+        function downloadText(name, text) { const u = URL.createObjectURL(new Blob([text], { type: 'text/plain' })), a = document.createElement('a'); a.href = u; a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(u), 3000) }
+
+        /* inspect */
+        function certCard(c, i, total) {
+            const role = c.is_ca ? (c.subject === c.issuer ? 'Root CA' : 'Intermediate CA') : (i === 0 ? 'Leaf / end-entity' : 'Certificate');
+            const sans = [...(c.dns_names || []), ...(c.ip_addresses || [])];
+            const ku = c.key_usage ? Object.keys(c.key_usage).filter(k => c.key_usage[k]).join(', ') : '';
+            const key = c.public_key_type.replace('_', '').replace(/PublicKey$/, '') + (c.public_key_bits ? ' ' + c.public_key_bits + '-bit' : '');
+            return '<details class="cert" ' + (i === 0 ? 'open' : '') + '><summary><span class="num">' + (i + 1) + '</span><span class="ttl"><b>' + esc(cn(c.subject)) + '</b><span>' + role + ' · issued by ' + esc(cn(c.issuer)) + '</span></span>' + expiryChip(c.days_remaining, c.currently_valid) + '</summary><div class="body">'
+                + kv([['Subject', c.subject, 1], ['Issuer', c.issuer, 1], ['Valid from', fmtDate(c.not_before)], ['Valid until', fmtDate(c.not_after) + expiryBar(c), 0, 1],
+                ['Serial', c.serial, 1], ['SHA-256 fingerprint', c.sha256, 1], ['Signature', c.signature_algorithm], ['Public key', key],
+                ['CA certificate', c.is_ca ? 'Yes' + (c.path_length != null ? ' (path length ' + c.path_length + ')' : '') : 'No'], ['Key usage', ku],
+                ['Extended key usage', (c.extended_key_usage || []).join(', ')]].map(r => r.length === 4 ? r : r))
+                + (sans.length ? '<div class="sec"><h4>Subject alternative names (' + sans.length + ')</h4><div class="chips">' + sans.map(s => '<span class="chip mono">' + esc(s) + '</span>').join('') + '</div></div>' : '')
+                + '<div class="sec"><div class="actions">' + copyBtn(c.pem, 'Copy PEM') + copyBtn(c.sha256, 'Copy fingerprint')
+                + dlBtn(c.pem, 'certificate-' + (i + 1) + '.pem') + '</div></div>'
+                + '<details class="sub-details"><summary>PEM</summary><pre>' + esc(c.pem) + '</pre></details>'
+                + '<details class="sub-details"><summary>Extensions (' + (c.extensions || []).length + ')</summary>' + (c.extensions || []).map(e => '<div class="sec"><h4>' + esc(e.name || e.oid) + (e.critical ? ' · critical' : '') + '</h4><pre>' + esc(e.value) + '</pre></div>').join('') + '</details>'
+                + '</div></details>';
+        }
+        async function inspect() {
+            const o = $('inspection'), btn = $('inspectbtn');
+            if (!$('inspectcert').value.trim()) { o.innerHTML = '<div class="banner bad"><span class="ic">⚠️</span><div><h3>Nothing to inspect</h3>Paste or upload a certificate first.</div></div>'; return }
+            busy(btn, true, 'Inspecting…'); o.innerHTML = '<div class="skeleton"></div>';
+            try {
+                const j = await (await post('/api/certificates/inspect', { certificates: $('inspectcert').value })).json();
+                const v = j.validation;
+                const st = v.valid ? 'good' : (v.errors.length ? 'bad' : 'warn');
+                const title = v.valid ? (v.anchor_source === 'bundle' ? 'Valid — chain verified up to the root included in your bundle' : 'Valid — chain verified against the supplied trust anchor') : (v.errors.length ? 'Invalid — problems found in the chain' : 'Not fully validated — trust not established');
+                const ic = { good: '✅', warn: '⚠️', bad: '❌' }[st];
+                o.innerHTML = '<div class="banner ' + st + '"><span class="ic">' + ic + '</span><div><h3>' + title + '</h3><div class="chips">'
+                    + '<span class="chip ' + (v.chain_signatures_valid ? 'good' : 'bad') + '">Signatures / structure: ' + (v.chain_signatures_valid ? 'OK' : 'Failed') + '</span>'
+                    + '<span class="chip ' + (v.trusted ? 'good' : 'warn') + '">Explicit trust: ' + (v.trusted ? 'Yes' : 'No') + '</span>'
+                    + '<span class="chip">' + j.certificates.length + ' certificate' + (j.certificates.length > 1 ? 's' : '') + '</span></div></div></div>'
+                    + ((v.errors.length || v.warnings.length || (v.auto_notes || []).length) ? '<ul class="msgs">' + (v.auto_notes || []).map(x => '<li class="w">ℹ️ ' + esc(x) + '</li>').join('') + v.errors.map(x => '<li class="e">❌ ' + esc(x) + '</li>').join('') + v.warnings.map(x => '<li class="w">⚠️ ' + esc(x) + '</li>').join('') + '</ul>' : '')
+                    + '<p class="note">' + esc(v.note) + '</p><div class="chain">' + j.certificates.map((c, i) => certCard(c, i, j.certificates.length)).join('') + '</div>';
+            } catch (e) { o.innerHTML = '<div class="banner bad"><span class="ic">❌</span><div><h3>Could not inspect</h3>' + esc(e.message) + '</div></div>' }
+            finally { busy(btn, false) }
+        }
+        function clearInspect() { $('inspectcert').value = ''; $('inspectfile').value = ''; $('inspectfile').parentElement.querySelector('.name').textContent = ''; $('inspection').innerHTML = ''; updateCount() }
+        function updateCount() { const n = ($('inspectcert').value.match(/-----BEGIN CERTIFICATE-----/g) || []).length; $('certcount').textContent = n ? n + ' certificate' + (n > 1 ? 's' : '') + ' detected' + (n > 1 ? ' — chain order and trust anchor will be determined automatically' : '') : '' }
+        $('inspectcert').addEventListener('input', updateCount); $('inspectfile').addEventListener('change', () => setTimeout(updateCount, 300));
+
+        /* generate */
+        async function generate(type) {
+            const isTrust = type === 'truststore', out = $(isTrust ? 'truststatus' : 'keystatus'), btn = $(isTrust ? 'trustbtn' : 'keybtn');
+            out.className = 'status'; out.textContent = ''; busy(btn, true, 'Generating…');
+            try {
+                const body = isTrust ? { certificates: $('trustcert').value, password: $('trustpass').value }
+                    : { certificates: $('keycert').value, private_key: $('privatekey').value, key_password: $('privatepass').value, password: $('keypass').value, alias: $('alias').value };
+                const r = await post('/api/jks/' + type, body);
+                const u = URL.createObjectURL(await r.blob()), a = document.createElement('a'); a.href = u; a.download = type + '.jks'; a.click(); setTimeout(() => URL.revokeObjectURL(u), 5000);
+                out.className = 'status ok'; out.textContent = '✅ ' + type + '.jks generated and downloaded.'; toast(type + '.jks downloaded');
+            } catch (e) { out.className = 'status err'; out.textContent = '❌ ' + e.message }
+            finally { busy(btn, false) }
+        }
+
+        /* remote */
+        async function remoteInspect() {
+            const o = $('remoteout'), btn = $('remotebtn'), host = $('host').value.trim();
+            if (!host) { o.innerHTML = '<div class="banner bad"><span class="ic">⚠️</span><div><h3>Enter a hostname</h3>For example: example.com</div></div>'; return }
+            busy(btn, true, 'Connecting…'); o.innerHTML = '<div class="skeleton"></div>';
+            try {
+                const r = await fetch('/api/inspect?host=' + encodeURIComponent(host)); const j = await r.json().catch(() => ({}));
+                if (!r.ok) throw Error(j.detail || 'Request failed');
+                const st = j.verified ? 'good' : 'warn';
+                o.innerHTML = '<div class="banner ' + st + '"><span class="ic">' + (j.verified ? '✅' : '⚠️') + '</span><div><h3>' + (j.verified ? 'Trusted by this server\'s CA store, hostname matches' : 'Certificate could not be verified') + '</h3>'
+                    + (j.verification_error ? '<div class="note">' + esc(j.verification_error) + '</div>' : '')
+                    + '<div class="chips"><span class="chip">' + esc(j.hostname) + '</span><span class="chip mono">' + esc(j.resolved_ip) + '</span>'
+                    + (j.tls_version ? '<span class="chip good">' + esc(j.tls_version) + '</span>' : '') + (j.cipher ? '<span class="chip">' + esc(j.cipher) + '</span>' : '') + '</div></div></div>'
+                    + '<p class="note">' + esc(j.note) + '</p><div class="chain">'
+                    + j.certificates.map(remoteCard).join('') + '</div>';
+            } catch (e) { o.innerHTML = '<div class="banner bad"><span class="ic">❌</span><div><h3>Could not inspect server</h3>' + esc(e.message) + '</div></div>' }
+            finally { busy(btn, false) }
+        }
+        function remoteCard(c, i) {
+            const role = i === 0 ? 'Leaf / server certificate' : (c.subject === c.issuer ? 'Root CA' : 'Intermediate CA');
+            const valid = c.days_remaining >= 0;
+            return '<details class="cert" ' + (i === 0 ? 'open' : '') + '><summary><span class="num">' + (i + 1) + '</span><span class="ttl"><b>' + esc(cn(c.subject)) + '</b><span>' + role + ' · issued by ' + esc(cn(c.issuer)) + '</span></span>' + expiryChip(c.days_remaining, valid) + '</summary><div class="body">'
+                + kv([['Subject', c.subject, 1], ['Issuer', c.issuer, 1], ['Valid from', fmtDate(c.not_before)], ['Valid until', fmtDate(c.not_after) + expiryBar(c), 0, 1], ['Serial', c.serial, 1], ['SHA-256 fingerprint', c.sha256, 1]])
+                + ((c.dns_names || []).length ? '<div class="sec"><h4>DNS names (' + c.dns_names.length + ')</h4><div class="chips">' + c.dns_names.map(s => '<span class="chip mono">' + esc(s) + '</span>').join('') + '</div></div>' : '')
+                + '<div class="sec"><div class="actions">' + copyBtn(c.sha256, 'Copy fingerprint') + '</div></div></div></details>';
+        }
+        $('host').addEventListener('keydown', e => { if (e.key === 'Enter') remoteInspect() });
+    </script>
+</body>
+
+</html>
